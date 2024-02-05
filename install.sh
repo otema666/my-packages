@@ -1,6 +1,5 @@
 #!/bin/bash
 
-clear
 path=$(pwd)
 
 print_message() {
@@ -13,6 +12,13 @@ print_message() {
   esac
 }
 
+# Check sudo
+if [ "$EUID" -ne 0 ]; then
+  print_message "red" "[!] Permiso denegado. Por favor ejecuta el programa como sudo."
+  exit 1
+fi
+clear
+
 print_message "cyan" "===== Actualizando repositorios ====="
 apt update && apt upgrade -y &> /dev/null
 print_message "cyan" "===== Sistema actualizado correctamente =====\n"
@@ -20,17 +26,18 @@ print_message "cyan" "===== Sistema actualizado correctamente =====\n"
 print_message "cyan" "===== Instalando programas ====="
 
 # Apt
-apt_packages=("bat" "neovim" "curl" "exa" "aircrack-ng" "gcc" "ruby" "octave" "git" "gparted" "nodejs" "gnome-tweaks")
+apt_packages=("bat" "neovim" "curl" "exa" "aircrack-ng" "gcc" "ruby" "octave" "git" "gparted" "nodejs" "gnome-tweaks" "keepass2")
 
 for package in "${apt_packages[@]}"; do
   if dpkg -l | grep -q $package; then
     print_message "yellow" "\t[-] $package ya estaba instalado."
   else
-    apt install -y $package
+    print_message "green" "\t[+] Instalando $package..."
+    apt install -y $package &> /dev/null
     if [ $? -eq 0 ]; then
-      print_message "green" "$package instalado correctamente."
+      print_message "green" "\t\t$package instalado correctamente."
     else
-      print_message "red" "Error al instalar $package."
+      print_message "red" "\t[!] Error al instalar $package."
     fi
   fi
 done
@@ -39,15 +46,16 @@ done
 if command -v speedtest &> /dev/null; then
   print_message "yellow" "\t[-] Speedtest ya estaba instalado."
 else
+  print_message "green" "\t[+] Instalando speedtest..."
   if apt install -y speedtest; then
-    print_message "green" "Speedtest instalado correctamente."
+    print_message "green" "\t\t[-] Speedtest instalado correctamente."
   else
-    print_message "yellow" "Intentando instalar Speedtest a través de script.deb.sh..."
+    print_message "yellow" "\tIntentando instalar Speedtest a través de script.deb.sh..."
     curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash && apt-get install -y speedtest
     if [ $? -eq 0 ]; then
       print_message "green" "Speedtest instalado correctamente."
     else
-      print_message "red" "Error al instalar Speedtest."
+      print_message "red" "\t[!] Error al instalar Speedtest."
     fi
   fi
 fi
@@ -67,6 +75,20 @@ for package in "${snap_packages[@]}"; do
     fi
   fi
 done
+
+# OhMyBash
+print_message "cyan" "===== Configurando OhMyBash ====="
+if [ -f ~/.bashrc ] && grep -q "oh-my-bash" ~/.bashrc; then
+  print_message "yellow" "\t[-] OhMyBash ya está configurado en este sistema"
+else
+  print_message "green" "\t[+] Descargando OhMyBash"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" &> /dev/null
+  echo "alias cat='batcat'" >> ~/.bashrc
+  echo "alias ls='exa --icons'" >> ~/.bashrc
+  sed -i 's/OSH_THEME=.*/OSH_THEME="axin"/' ~/.bashrc
+  print_message "green" "\t\t[+] Configuración de Oh My Bash completada"
+fi
+
 
 print_message "cyan" "===== Instalando fuentes ====="
 
