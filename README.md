@@ -4,13 +4,14 @@
 
 With wget:
 ```bash
-$ wget -qO- https://github.com/otema666/my-packages/archive/main.zip > /tmp/my-packages.zip && unzip -qq /tmp/my-packages.zip -d /tmp && /bin/bash /tmp/my-packages-main/main.sh
+wget -qO- https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh | bash
+
 ```
 
 or with curl:
 
 ```bash
-curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh | sudo bash
+curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh | bash
 ```
 
 
