@@ -57,7 +57,9 @@ gnome_extension() {
 }
 
 wallpaper() {
-  wget -q "https://github.com/otema666/my-packages/blob/main/assets/wallpaper.jpg" -O ~/wallpaper.jpg
+  wget -q "https://github.com/otema666/my-packages/blob/main/assets/wallpaper.jpg?raw=true" -O ~/wallpaper.jpg
+  sleep 2
+  gsettings set org.gnome.desktop.background picture-uri "file://$HOME/wallpaper.jpg"
   gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/wallpaper.jpg"
 }
 
