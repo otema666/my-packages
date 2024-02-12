@@ -21,6 +21,13 @@ print_message() {
   esac
 }
 
+ctrl_c() {
+  print_message "red" "\n[!] Detectado ctrl+c, saliendo..."
+  exit 1
+}
+
+trap 'ctrl_c' INT
+
 check_internet_connection() {
     wget -q --spider http://example.com
     if [ $? -eq 0 ]; then
@@ -138,7 +145,7 @@ for package in "${prerequisites[@]}"; do
     fi
 done
 
-clear && figlet "                   Auto installer" | lolcat
+clear && figlet "Auto installer" -c | lolcat
 
 if gsettings set org.gnome.desktop.interface color-scheme prefer-dark; then
   print_message "[+] Tema oscuro aplicado."
