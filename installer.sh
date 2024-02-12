@@ -113,7 +113,7 @@ bind_fulls_terminal() {
 }
 
 variables_personales (){
-    if ! type -t buscar >/dev/null; then
+    if if ! grep -q "buscar()" ~/.bashrc; then
         print_message "yellow" "\t\t[-] Añadiendo función buscar..."
         echo "buscar() {" >> ~/.bashrc
         echo '  sudo find "$2" -name "$1"' >> ~/.bashrc
