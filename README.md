@@ -19,6 +19,8 @@ curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh
 
 - **Full Screen Terminal**: <kbd>Windows</kbd> + <kbd>F</kbd>
 
+- **Open nautilus (file explorer)**: <kbd>Windows</kbd> + <kbd>E</kbd>
+
 - **Close Active Window**: <kbd>Windows</kbd> + <kbd>W</kbd>
 
 - **Switch to Workspace 1**: <kbd>Super</kbd> + <kbd>1</kbd>.

@@ -92,8 +92,9 @@ bind_fulls_terminal() {
   local terminal_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
   local brave_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
   local firefox_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
+  local nautilus_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
   
-  local keybindings="[ '$terminal_path', '$brave_path', '$firefox_path' ]"
+  local keybindings="[ '$terminal_path', '$brave_path', '$firefox_path', '$nautilus_path' ]"
 
   gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$keybindings"
 
@@ -118,6 +119,12 @@ bind_fulls_terminal() {
   # Close current window (Super + W)
   gsettings set org.gnome.desktop.wm.keybindings close "['<Super>w']"
   print_message "yellow" "\t [+] Configurado cerrar la ventana activa: (Super + W)"
+
+  # Open nautilus (Super + E)
+  gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$nautilus_path name 'Nautilus'
+  gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$nautilus_path command 'nautilus'
+  gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$nautilus_path binding '<Super>e'
+  print_message "yellow" "\t [+] Configurado abrir explorador de archivos: (Super + E)"
 
   # Config workspaces
   gsettings set org.gnome.mutter dynamic-workspaces false
