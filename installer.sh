@@ -3,12 +3,18 @@
 # var
 path=$(pwd)
 prerequisites=("lolcat" "figlet")
-apt_packages=("bat" "neovim" "curl" "exa" "aircrack-ng" "net-tools" "gcc" "neofetch" "ruby" "ruby-bundler" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
-snap_packages=("code --classic" "gimp" "brave" "discord" "vlc")
+apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
+snap_packages=("code --classic" "gimp" "brave" "discord" "vlc" "ngrok")
 message=0
 dconf="https://raw.githubusercontent.com/otema666/my-packages/main/otema666.dconf"
 dconfdir="/org/gnome/terminal/legacy/profiles:"
 otema666_profile="otema666.dconf"
+extension_list=(
+  https://extensions.gnome.org/extension/1532/lock-keys/
+  https://extensions.gnome.org/extension/1460/vitals/                 # pls fix
+  https://extensions.gnome.org/extension/3952/workspace-indicator/
+  https://extensions.gnome.org/extension/5489/search-light/           # pls fix
+  )
 
 # functions
 print_message() {
@@ -46,14 +52,21 @@ gnome_extension() {
     gnome-extensions disable ubuntu-dock@ubuntu.com
   fi
 
-  if [ ! -d "$HOME/.local/share/gnome-shell/extensions/search-light" ]; then
-    git clone https://github.com/icedman/search-light ~/.local/share/gnome-shell/extensions/search-light
-    cd ~/.local/share/gnome-shell/extensions/search-light
-    make
-    cd $path
-  else
-    print_message "yellow" "\t[-] La extensión de búsqueda ya está instalada."
-  fi
+  gsettings set org.gnome.desktop.wm.preferences focus-new-windows 'smart'
+
+  for i in "${extension_list[@]}"
+  do
+      EXTENSION_ID=$(curl -s $i | grep -oP 'data-uuid="\K[^"]+')
+      VERSION_TAG=$(curl -Lfs "https://extensions.gnome.org/extension-query/?search=$EXTENSION_ID" | jq '.extensions[0] | .shell_version_map | map(.pk) | max')
+      wget -O ${EXTENSION_ID}.zip "https://extensions.gnome.org/download-extension/${EXTENSION_ID}.shell-extension.zip?version_tag=$VERSION_TAG" &> /dev/null
+      gnome-extensions install --force ${EXTENSION_ID}.zip
+      if ! gnome-extensions list | grep --quiet ${EXTENSION_ID}; then
+          busctl --user call org.gnome.Shell.Extensions /org/gnome/Shell/Extensions org.gnome.Shell.Extensions InstallRemoteExtension s ${EXTENSION_ID}
+      fi
+      gnome-extensions enable ${EXTENSION_ID}
+      print_message "green" "\t[+] Instalado ${EXTENSION_ID}"
+      rm ${EXTENSION_ID}.zip
+  done
 }
 
 wallpaper() {
@@ -172,12 +185,43 @@ bind_fulls_terminal() {
 }
 
 variables_personales (){
-    if ! grep -q "buscar()" ~/.bashrc; then
-        print_message "yellow" "\t\t[-] Añadiendo función buscar..."
-        echo "buscar() {" >> ~/.bashrc
-        echo '  sudo find "$2" -name "$1"' >> ~/.bashrc
-        echo "}" >> ~/.bashrc
+  if ! grep -q "alias open='xdg-open'" ~/.bashrc; then
+    print_message "yellow" "\t\t[-] Añadiendo alias open..."
+    echo "alias open='xdg-open'" >> ~/.bashrc
+  fi
+
+  if ! grep -q "buscar()" ~/.bashrc; then
+    print_message "yellow" "\t\t[-] Añadiendo función buscar..."
+    echo "buscar() {" >> ~/.bashrc
+    echo '  sudo find "$2" -name "$1"' >> ~/.bashrc
+    echo "}" >> ~/.bashrc
+  fi
+}
+
+firewall() {
+    if [ -d "$HOME/bin" ] && [ -f "$HOME/bin/firewall.sh" ]; then
+        print_message "yellow" "\t[-] La funcion firewall ya estaba configurada."
+        return
     fi
+
+    if [ ! -d "$HOME/bin" ]; then
+        mkdir "$HOME/bin"
+        print_message "green" "\t[+] Created directory ~/bin"
+    fi
+
+    print_message "cyan" "\t\t [*] Descargando firewall.sh de otema666 (https://github.com/otema666/ubuntu-ufw-manager)..."
+    wget -q -O "$HOME/bin/firewall.sh" "https://raw.githubusercontent.com/otema666/ubuntu-ufw-manager/main/firewall.sh"
+    sudo chmod +x "$HOME/bin/firewall.sh"
+    # Agregar ~/bin al PATH en el archivo .bashrc si no estaba agregado previamente
+    if ! grep -qF "$HOME/bin" "$HOME/.bashrc"; then
+        echo "Adding ~/bin to PATH in .bashrc..."
+        echo "" >> "$HOME/.bashrc"
+        echo "# Add ~/bin to PATH" >> "$HOME/.bashrc"
+        echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.bashrc"
+        echo "Added ~/bin to PATH in .bashrc."
+    fi
+    
+    print_message "green" "\t[+] Funcion firewall configurada con exito."
 }
 
 # Start with program.
@@ -209,41 +253,6 @@ clear && figlet "Auto installer" -c | lolcat
 print_message "cyan" "===== Actualizando repositorios ====="
 sudo apt update && sudo apt upgrade -y &> /dev/null
 print_message "cyan" "===== Sistema actualizado correctamente =====\n"
-
-if gsettings set org.gnome.desktop.interface color-scheme prefer-dark; then
-  print_message "[+] Tema oscuro aplicado."
-else
-  print_message "red" "\t Error al configurar el modo oscuro."
-fi
-
-print_message "cyan" "===== Configurando barra superior... ====="
-if gsettings set org.gnome.desktop.interface clock-show-seconds true; then
-  print_message "green" "\t[+] Mostrar segundos activado"
-else
-  print_message "red" "\t[!] Error al activar mostrar segundos."
-fi
-
-if gsettings set org.gnome.desktop.interface enable-hot-corners false; then
-  print_message "green" "\t[+] Botón de actividades no animado"
-else
-  print_message "red" "\t[!] Error al configurar botón de actividades."
-fi
-
-# Extension
-print_message "cyan" "===== Configurando extensiones... ====="
-if gnome_extension; then
-  print_message "green" "\t[+] Extensiones configuradas correctamente."
-else
-  print_message "red" "\t[!] Error al configurar las extensiones."
-fi
-
-# Background
-print_message "cyan" "===== Configurando fondo de pantalla... ====="
-if wallpaper; then
-  print_message "green" "\t[+] Configurado correctamente"
-else
-  print_message "red" "\t[!] Error al configurar el fondo de pantalla"
-fi
 
 print_message "cyan" "===== Instalando programas ====="
 
@@ -293,6 +302,44 @@ for package in "${snap_packages[@]}"; do
     fi
   fi
 done
+
+print_message "cyan" "===== Configurando función firewall... ====="
+firewall
+read -p "hola"
+if gsettings set org.gnome.desktop.interface color-scheme prefer-dark; then
+  print_message "[+] Tema oscuro aplicado."
+else
+  print_message "red" "\t Error al configurar el modo oscuro."
+fi
+
+print_message "cyan" "===== Configurando barra superior... ====="
+if gsettings set org.gnome.desktop.interface clock-show-seconds true; then
+  print_message "green" "\t[+] Mostrar segundos activado"
+else
+  print_message "red" "\t[!] Error al activar mostrar segundos."
+fi
+
+if gsettings set org.gnome.desktop.interface enable-hot-corners false; then
+  print_message "green" "\t[+] Botón de actividades no animado"
+else
+  print_message "red" "\t[!] Error al configurar botón de actividades."
+fi
+
+# Extension
+print_message "cyan" "===== Configurando extensiones... ====="
+if gnome_extension; then
+  print_message "green" "\t[+] Extensiones configuradas correctamente."
+else
+  print_message "red" "\t[!] Error al configurar las extensiones."
+fi
+
+# Background
+print_message "cyan" "===== Configurando fondo de pantalla... ====="
+if wallpaper; then
+  print_message "green" "\t[+] Configurado correctamente"
+else
+  print_message "red" "\t[!] Error al configurar el fondo de pantalla"
+fi
 
 # OhMyBash
 print_message "cyan" "===== Configurando OhMyBash ====="

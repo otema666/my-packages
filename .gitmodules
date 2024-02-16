@@ -1,0 +1,3 @@
+[submodule "ubuntu-ufw-manager"]
+	path = ubuntu-ufw-manager
+	url = https://github.com/otema666/ubuntu-ufw-manager.git
