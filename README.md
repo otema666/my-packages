@@ -17,7 +17,7 @@ curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh
 
 ## Keyboard Shortcuts
 
-- **Full Screen Terminal**: <kbd>Windows</kbd> + <kbd>F</kbd>
+- **Full Screen Terminal**: <kbd>Windows</kbd> + <kbd>Enter</kbd>
 
 - **Open nautilus (file explorer)**: <kbd>Windows</kbd> + <kbd>E</kbd>
 
