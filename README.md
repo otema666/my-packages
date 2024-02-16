@@ -55,6 +55,8 @@ curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh
 
 - ```firewall```: call this funct from terminal and the firewall manager will be launched
 
+- ```server```: usage: *buscar &lt;directory&gt; &lt;port&gt;* (python local server)
+
 <br>
 
 ![otema666](https://github.com/otema666/my-packages/assets/126337147/a511043d-62bd-4d5e-ba37-a43070736dad)

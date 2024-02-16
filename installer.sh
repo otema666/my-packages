@@ -196,6 +196,19 @@ variables_personales (){
     echo '  sudo find "$2" -name "$1"' >> ~/.bashrc
     echo "}" >> ~/.bashrc
   fi
+  
+  if ! grep -q "server()" ~/.bashrc; then
+    print_message "yellow" "\t\t[-] Añadiendo función server..."
+    echo " " >> ~/.bashrc
+    echo "# Funcion servidor de python" >> ~/.bashrc
+    echo "server() {" >> ~/.bashrc
+    echo '  if [ $# -eq 0 ]; then' >> ~/.bashrc
+    echo '    echo "Uso: server <directorio> <puerto>"' >> ~/.bashrc
+    echo '    return 1' >> ~/.bashrc
+    echo '  fi' >> ~/.bashrc
+    echo '  sudo python3 -m http.server --directory $1 $2'  >> ~/.bashrc
+    echo "}" >> ~/.bashrc
+  fi
 }
 
 firewall() {
