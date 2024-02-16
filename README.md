@@ -51,7 +51,7 @@ curl -s https://raw.githubusercontent.com/otema666/my-packages/main/installer.sh
 
 ## Personal functions
 
-- ```buscar``` usage: *buscar bash &lt;directory&gt; &lt;filename&gt;*
+- ```buscar``` usage: *buscar &lt;directory&gt; &lt;filename&gt;*
 
 - ```firewall```: call this funct from terminal and the firewall manager will be launched
 
