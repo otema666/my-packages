@@ -3,17 +3,19 @@
 # var
 path=$(pwd)
 prerequisites=("lolcat" "figlet")
-apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
+apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "gnome-shell-extension-manager" "gir1.2-gtop-2.0" "lm-sensors" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
 snap_packages=("code --classic" "gimp" "brave" "discord" "vlc" "ngrok")
+pip_packages=("gnome-extensions-cli")
 message=0
 dconf="https://raw.githubusercontent.com/otema666/my-packages/main/otema666.dconf"
+nano7_2="https://www.nano-editor.org/dist/latest/nano-7.2.tar.gz"
 dconfdir="/org/gnome/terminal/legacy/profiles:"
 otema666_profile="otema666.dconf"
 extension_list=(
-  https://extensions.gnome.org/extension/1532/lock-keys/
-  https://extensions.gnome.org/extension/1460/vitals/                 # pls fix
-  https://extensions.gnome.org/extension/3952/workspace-indicator/
-  https://extensions.gnome.org/extension/5489/search-light/           # pls fix
+  lockkeys@fawtytoo
+  Vitals@CoreCoding.com
+  horizontal-workspace-indicator@tty2.io
+  search-light@icedman.github.com
   )
 
 # functions
@@ -44,36 +46,44 @@ check_internet_connection() {
 }
 
 # config extension
+
 gnome_extension() {
-  if ! gnome-extensions list | grep -q ding@rastersoft.com; then
+  extension_in_system=$(gnome-extensions list)
+  for installed_extension in "${extension_in_system[@]}";do
+    gext uninstall $installed_extension &> /dev/null
+  done
+  if gnome-extensions list | grep -q ding@rastersoft.com; then
     gnome-extensions disable ding@rastersoft.com
+    print_message "green" "\t[+] Desactivado mostrar iconos del escritorio."
   fi
-  if ! gnome-extensions list | grep -q ubuntu-dock@ubuntu.com; then
+  
+  if gnome-extensions list | grep -q ubuntu-dock@ubuntu.com; then
     gnome-extensions disable ubuntu-dock@ubuntu.com
+    print_message "green" "\t[+] Desactivado mostrar dock."
   fi
 
   gsettings set org.gnome.desktop.wm.preferences focus-new-windows 'smart'
 
-  for i in "${extension_list[@]}"
-  do
-      EXTENSION_ID=$(curl -s $i | grep -oP 'data-uuid="\K[^"]+')
-      VERSION_TAG=$(curl -Lfs "https://extensions.gnome.org/extension-query/?search=$EXTENSION_ID" | jq '.extensions[0] | .shell_version_map | map(.pk) | max')
-      wget -O ${EXTENSION_ID}.zip "https://extensions.gnome.org/download-extension/${EXTENSION_ID}.shell-extension.zip?version_tag=$VERSION_TAG" &> /dev/null
-      gnome-extensions install --force ${EXTENSION_ID}.zip
-      if ! gnome-extensions list | grep --quiet ${EXTENSION_ID}; then
-          busctl --user call org.gnome.Shell.Extensions /org/gnome/Shell/Extensions org.gnome.Shell.Extensions InstallRemoteExtension s ${EXTENSION_ID}
-      fi
-      gnome-extensions enable ${EXTENSION_ID}
-      print_message "green" "\t[+] Instalado ${EXTENSION_ID}"
-      rm ${EXTENSION_ID}.zip
+  for extension in "${extension_list[@]}"; do
+    if gext install "$extension" 2>&1 | grep -q "is already installed"; then
+        print_message "yellow" "\t[-] La extensión $extension ya estaba instalada."
+    else
+      print_message "green" "\t[+] Instalada $extension"
+    fi
+    gext enable "$extension" &> /dev/null
   done
+  print_message "cyan" "\t== Actualizando extensiones... == "
+  gext update &> /dev/null
+  print_message "green" "\t [+] Actualizadas con exito. Lista de extensiones:"
+  gext list
+
 }
 
 wallpaper() {
-  wget -q "https://github.com/otema666/my-packages/blob/main/assets/wallpaper.jpg?raw=true" -O ~/wallpaper.jpg
-  sleep 2
-  gsettings set org.gnome.desktop.background picture-uri "file://$HOME/wallpaper.jpg"
-  gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/wallpaper.jpg"
+  wget -q "https://github.com/otema666/my-packages/blob/main/assets/wallpaper.jpg?raw=true" -O ~/.wallpaper.jpg
+  sleep 1.5
+  gsettings set org.gnome.desktop.background picture-uri "file://$HOME/.wallpaper.jpg"
+  gsettings set org.gnome.desktop.background picture-uri-dark "file://$HOME/.wallpaper.jpg"
 }
 
 # otema666 theme function
@@ -212,7 +222,7 @@ variables_personales (){
 }
 
 firewall() {
-    if [ -d "$HOME/bin" ] && [ -f "$HOME/bin/firewall.sh" ]; then
+    if [ -d "$HOME/bin" ] && [ -f "$HOME/bin/firewall" ]; then
         print_message "yellow" "\t[-] La funcion firewall ya estaba configurada."
         return
     fi
@@ -225,6 +235,7 @@ firewall() {
     print_message "cyan" "\t\t [*] Descargando firewall.sh de otema666 (https://github.com/otema666/ubuntu-ufw-manager)..."
     wget -q -O "$HOME/bin/firewall.sh" "https://raw.githubusercontent.com/otema666/ubuntu-ufw-manager/main/firewall.sh"
     sudo chmod +x "$HOME/bin/firewall.sh"
+    sudo mv firewall.sh firewall
     # Agregar ~/bin al PATH en el archivo .bashrc si no estaba agregado previamente
     if ! grep -qF "$HOME/bin" "$HOME/.bashrc"; then
         echo "Adding ~/bin to PATH in .bashrc..."
@@ -235,6 +246,18 @@ firewall() {
     fi
     
     print_message "green" "\t[+] Funcion firewall configurada con exito."
+}
+
+config_nano() {
+  nano_improved_repo="$HOME/.nano/readme.md"
+  print_message "cyan" "==== Configurando nanorc... ===="
+  
+  if [ ! -f "$nano_improved_repo" ]; then
+    curl https://raw.githubusercontent.com/scopatz/nanorc/master/install.sh | sh &> /dev/null 
+    print_message "green" "\t[-] Nano configurado."
+  else
+    print_message "yellow" "\t[-] Nano ya estaba configurado."  
+  fi
 }
 
 # Start with program.
@@ -264,7 +287,7 @@ done
 clear && figlet "Auto installer" -c | lolcat
 
 print_message "cyan" "===== Actualizando repositorios ====="
-sudo apt update && sudo apt upgrade -y &> /dev/null
+#sudo apt update && sudo apt upgrade -y &> /dev/null
 print_message "cyan" "===== Sistema actualizado correctamente =====\n"
 
 print_message "cyan" "===== Instalando programas ====="
@@ -304,7 +327,7 @@ fi
 
 # Snap
 for package in "${snap_packages[@]}"; do
-  if snap list | grep -q "$package"; then
+  if snap list | grep -q "$package" || snap list | grep -q "code"; then
     print_message "yellow" "\t[-] \"$package\" ya está instalado."
   else
     sudo snap install $package
@@ -316,9 +339,15 @@ for package in "${snap_packages[@]}"; do
   fi
 done
 
+# pip
+for package in "${pip_packages[@]}"; do
+  pip3 install $package &> /dev/null
+  print_message "green" "\t[+] $package instalado"
+done
+
 print_message "cyan" "===== Configurando función firewall... ====="
 firewall
-read -p "hola"
+
 if gsettings set org.gnome.desktop.interface color-scheme prefer-dark; then
   print_message "[+] Tema oscuro aplicado."
 else
@@ -400,6 +429,9 @@ else
   print_message "red" "\t\t[!] Error al descargar otema666 theme."
 fi
 
+# Configuracion de nano
+config_nano
+
 # Atajos de teclado
 print_message "cyan" "===== Configurando atajos de teclado... ====="
 if bind_fulls_terminal; then
@@ -410,6 +442,12 @@ fi
 
 print_message "cyan" "===== Configurando variables personales... ====="
 variables_personales
+
+if [ "$(pwd)" != "$path" ]; then
+  cd "$path"
+fi
+
+rm *.zip
 
 print_message "cyan" "===== Actualizando repositorios ====="
 sudo apt update &> /dev/null
