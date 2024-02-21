@@ -5,7 +5,7 @@ path=$(pwd)
 prerequisites=("lolcat" "figlet")
 apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "gnome-shell-extension-manager" "gir1.2-gtop-2.0" "lm-sensors" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
 snap_packages=("code --classic" "gimp" "brave" "discord" "vlc" "ngrok")
-pip_packages=("gnome-extensions-cli")
+pip_packages=("gnome-extensions-cli" "numpy" "flask" "requests")
 message=0
 dconf="https://raw.githubusercontent.com/otema666/my-packages/main/otema666.dconf"
 nano7_2="https://www.nano-editor.org/dist/latest/nano-7.2.tar.gz"
@@ -287,7 +287,7 @@ done
 clear && figlet "Auto installer" -c | lolcat
 
 print_message "cyan" "===== Actualizando repositorios ====="
-#sudo apt update && sudo apt upgrade -y &> /dev/null
+sudo apt update && sudo apt upgrade -y &> /dev/null
 print_message "cyan" "===== Sistema actualizado correctamente =====\n"
 
 print_message "cyan" "===== Instalando programas ====="
@@ -341,8 +341,17 @@ done
 
 # pip
 for package in "${pip_packages[@]}"; do
-  pip3 install $package &> /dev/null
-  print_message "green" "\t[+] $package instalado"
+  if pip3 show "$package" &> /dev/null; then
+    print_message "yellow" "\t[-]$package ya estaba instalado"
+  else
+    print_message "green" "\t[+] Instalando $package..."
+    pip3 install "$package" &> /dev/null
+    if [ $? -eq 0 ]; then
+        print_message "green" "\t\t [+] $package instalado correctamente."
+    else
+        print_message "red" "\t[!] Error al instalar $package."
+    fi
+  fi
 done
 
 print_message "cyan" "===== Configurando función firewall... ====="
