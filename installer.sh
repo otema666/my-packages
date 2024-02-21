@@ -456,7 +456,6 @@ if [ "$(pwd)" != "$path" ]; then
   cd "$path"
 fi
 
-rm *.zip
 
 print_message "cyan" "===== Actualizando repositorios ====="
 sudo apt update &> /dev/null
