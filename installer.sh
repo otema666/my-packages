@@ -4,7 +4,7 @@
 path=$(pwd)
 prerequisites=("lolcat" "figlet")
 apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "gnome-shell-extension-manager" "gir1.2-gtop-2.0" "lm-sensors" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab")
-snap_packages=("code --classic" "gimp" "brave" "discord" "vlc" "ngrok")
+snap_packages=("gimp" "brave" "discord" "vlc" "ngrok")
 pip_packages=("gnome-extensions-cli" "numpy" "flask" "requests")
 message=0
 dconf="https://raw.githubusercontent.com/otema666/my-packages/main/otema666.dconf"
@@ -326,8 +326,15 @@ else
 fi
 
 # Snap
+if snap list | grep -q "code"; then
+  print_message "yellow" "\t[-] "vscode" ya está instalado."
+else
+  sudo snap install code --classic
+  print_message "green" "\t[+] vscode instalado correctamente."
+
+fi
 for package in "${snap_packages[@]}"; do
-  if snap list | grep -q "$package" || snap list | grep -q "code"; then
+  if snap list | grep -q "$package"; then
     print_message "yellow" "\t[-] \"$package\" ya está instalado."
   else
     sudo snap install $package
@@ -410,15 +417,15 @@ print_message "cyan" "===== Instalando fuentes ====="
 
 # Font: SauceCodePro
 if fc-list | grep -q "SauceCodePro"; then
-  print_message "yellow" "\t[-] La fuente SauceCodePro ya estaba instalada."
+  print_message "yellow" "\t[-] La fuente SourceCodePro ya estaba instalada."
 else
-  sudo wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/SauceCodePro.zip -P /usr/share/fonts/ && \
-  sudo unzip /usr/share/fonts/SauceCodePro.zip -d /usr/share/fonts/ && \
-  sudo rm /usr/share/fonts/SauceCodePro.zip && \
-  sudo rm /usr/share/fonts/README.md && \
-  sudo rm /usr/share/fonts/LICENSE.txt && \
+  sudo wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/SourceCodePro.zip -P /usr/share/fonts/ && \
+  sudo unzip /usr/share/fonts/SourceCodePro.zip -d /usr/share/fonts/SourceCodePro && \
+  sudo rm -f /usr/share/fonts/SourceCodePro.zip && \
+  sudo rm -f /usr/share/fonts/SourceCodePro/README.md && \
+  sudo rm -f /usr/share/fonts/SourceCodePro/LICENSE.txt && \
   cd $path
-  print_message "green" "Fuente SauceCodePro instalada correctamente."
+  print_message "green" "Fuente SourceCodePro instalada correctamente."
 fi
 
 # gnomme-terminal
