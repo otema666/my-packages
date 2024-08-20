@@ -3,7 +3,7 @@
 # var
 path=$(pwd)
 prerequisites=("lolcat" "figlet")
-apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "gnome-shell-extension-manager" "gir1.2-gtop-2.0" "lm-sensors" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab" "htop")
+apt_packages=("bat" "ufw" "neovim" "nmap" "curl" "exa" "jq" "aircrack-ng" "net-tools" "gcc" "neofetch" "gnome-shell-extension-manager" "gir1.2-gtop-2.0" "lm-sensors" "ruby" "ruby-bundler" "apache2-utils" "ruby-dev" "xdotool" "octave" "lolcat" "git" "gparted" "nodejs" "gnome-tweaks" "gnome-shell-extensions" "gnome-shell-extension-prefs" "keepassxc" "dbus-x11" "python3-pip" "tree" "baobab" "htop" "libnotify-bin")
 snap_packages=("gimp" "brave" "discord" "vlc" "ngrok")
 pip_packages=("gnome-extensions-cli" "numpy" "flask" "requests")
 message=0
@@ -260,6 +260,21 @@ config_nano() {
   fi
 }
 
+powerprofiles() {
+  print_message "cyan" "==== Configurando Atajo para alternar modo de energía... ===="
+
+  echo "# Performance / Ahorro de energia script (Fn + F5)" >> $HOME/.xbindkeysrc
+  echo '"bash $HOME/powerprofiles.sh"' >> $HOME/.xbindkeysrc
+  echo "   Control + Alt + p" >> $HOME/.xbindkeysrc
+  killall -s1 xbindkeys
+  xbindkeys
+
+  wget -q "https://raw.githubusercontent.com/otema666/my-packages/main/powerprofiles.sh" -O ~/powerprofiles.sh
+
+  print_message "green" "\t[-] Atajo para alternar modo de energía configurado."
+
+}
+
 # Start with program.
 if [ "$EUID" -eq 0 ]; then
   print_message "red" "[!] No puedes ejecutar este script como root."
@@ -447,6 +462,8 @@ fi
 
 # Configuracion de nano
 config_nano
+
+powerprofiles
 
 # Atajos de teclado
 print_message "cyan" "===== Configurando atajos de teclado... ====="

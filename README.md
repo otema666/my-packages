@@ -34,7 +34,7 @@ Here are some useful keyboard shortcuts to enhance your workflow:
 - **Move Window to Workspace 4**: <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd>
 - **Brave Browser**: <kbd>Control</kbd> + <kbd>Alt</kbd> + <kbd>B</kbd>
 - **Firefox Browser**: <kbd>Control</kbd> + <kbd>Alt</kbd> + <kbd>F</kbd>
-
+- **Toogle battery power mode**: <kbd>Control</kbd> + <kbd>Alt</kbd> + <kbd>P</kbd>
 ## Personal Functions
 
 Some custom functions that you can use in your terminal for improved productivity:
