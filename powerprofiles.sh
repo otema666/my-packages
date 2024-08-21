@@ -4,13 +4,13 @@ status=$(powerprofilesctl get)
 
 if [ "$status" == "power-saver" ]; then
     powerprofilesctl set balanced
-    status="AHORRO DE ENERGIA"
+    status="BALANCED"
 elif [ "$status" == "balanced" ]; then
     powerprofilesctl set performance
-    status="BALANCED"
+    status="PERFORMANCE"
 else
     powerprofilesctl set power-saver
-    status="PERFORMANCE"
+    status="AHORRO DE ENERGIA"
 fi 
 
 notify-send "El modo $status ha sido activado" --app-name=System
